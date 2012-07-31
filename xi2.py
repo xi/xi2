@@ -4,7 +4,6 @@ import sys
 import re
 from iparser import IParser
 from midi import Midi, MidiFile
-from random import randint
 
 # creates indermediate code from xi2 code
 # and than uses iparser to create midi bytecode
@@ -107,7 +106,7 @@ for name, track in tracks.iteritems():
 	# write meta info
 	m.metaEvent(0, 0x04, len(name), name)
 	try: prog = int(name)
-	except ValueError: prog = randint(0,127)
+	except ValueError: prog = 0
 	m.progCh(0, ch, prog)
 	# write data
 	ip = IParser(track, ch=ch, offset=76)
