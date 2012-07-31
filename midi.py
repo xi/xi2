@@ -80,7 +80,7 @@ class Midi:
 	def ctrlEvent(self, dt, ctrl, v):
 		self.chEvent(dt, 0xB, ch, ctrl, v)
 
-	def setVol(self, dt, ch, vol=1)
+	def setVol(self, dt, ch, vol=1):
 		self.ctrlEvent(dt, ch, 0x07, int(vol * 0x7f))
 
 class MidiFile(Midi):

@@ -1,19 +1,26 @@
 #!/usr/bin/env python
 
-import sys
 import re
 from iparser import IParser
 from midi import Midi, MidiFile
+import argparse
 
 # creates indermediate code from xi2 code
 # and than uses iparser to create midi bytecode
+
+parser = argparse.ArgumentParser()
+parser.add_argument('-t', '--tempo', help="tempo in bpm", default=120, type=int)
+parser.add_argument('-o', '--offset', help="key offset", default=60, type=int)
+parser.add_argument('infile')
+parser.add_argument('outfile')
+args = parser.parse_args()
 
 def length(data):
 	data = re.sub('{[^}]*}', '', data)
 	data = re.sub('\([^\)]*\)', '', data)
 	return len(data.split(',')) - 1	
 
-f = open(sys.argv[1])
+f = open(args.infile)
 lines = f.readlines()
 f.close()
 
@@ -51,8 +58,6 @@ ll = re.sub('\\\\n(\\\\n)+', '\\\\n\\\\n', ll)
 ll = re.sub('\\\\n', '\n', ll)
 # remove newlines at the end
 ll = re.sub('\n*$', '', ll)
-
-print ll
 
 def parse(t):
 	string = '';
@@ -97,7 +102,7 @@ mf = MidiFile()
 
 # create first track with meta infos
 m = Midi()
-m.setTempo(25)
+m.setTempo(args.tempo)
 mf.addTrack(m)
 
 ch = 0
@@ -109,11 +114,11 @@ for name, track in tracks.iteritems():
 	except ValueError: prog = 0
 	m.progCh(0, ch, prog)
 	# write data
-	ip = IParser(track, ch=ch, offset=76)
+	ip = IParser(track, ch=ch, offset=args.offset)
 	m += ip.midi
 	# write
 	mf.addTrack(m)
 	ch += 1
 
 # write to file
-mf.write('test.mid')
+mf.write(args.outfile)
