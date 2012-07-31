@@ -6,6 +6,9 @@ from iparser import IParser
 from midi import Midi, MidiFile
 from random import randint
 
+# creates indermediate code from xi2 code
+# and than uses iparser to create midi bytecode
+
 def length(data):
 	data = re.sub('{[^}]*}', '', data)
 	data = re.sub('\([^\)]*\)', '', data)

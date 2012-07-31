@@ -5,6 +5,7 @@
 timeDevision = 0x00c0 # two bytes
 
 class Midi:
+# creates midi bytecode from midi events
 
 	def __init__(self):
 		self._buf = ''
