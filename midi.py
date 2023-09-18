@@ -24,10 +24,10 @@ class Midi:
 
     def write_fixed(self, n, k):
         if type(n) == type(''):
-            self._buf += (' '*k + n)[-k:]
+            self._buf += (' ' * k + n)[-k:]
         else:
             if k != 0:
-                self.write_fixed(n / 0x100, k-1)
+                self.write_fixed(n / 0x100, k - 1)
                 self._buf += chr(n % 0x100)
 
     def write_variable(self, n, _rec=False):
@@ -62,7 +62,7 @@ class Midi:
 
     def set_tempo(self, bpm):
         # midi uses microsec/quarter note
-        msqn = 60000000/bpm
+        msqn = 60000000 // bpm
         self.meta_event(0, 0x51, 3, msqn)
 
     def note_on(self, dt, ch, key, vol=1):
@@ -98,7 +98,7 @@ class MidiFile(Midi):
         self.write_fixed(TIME_DEVISION, 2)  # time devision
         for track in self._tracks:
             self.write_fixed(0x4D54726B, 4)  # chunk ID "MTtr"
-            self.write_fixed(len(track._buf)+4, 4)  # chunk size
+            self.write_fixed(len(track._buf) + 4, 4)  # chunk size
             self._buf += track._buf
             self.meta_event(0, 0x2f, 0, '')  # end_track event
 

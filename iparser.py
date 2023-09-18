@@ -24,7 +24,7 @@ class IParser:
 
     def parse_el(self, e):
         if e.isdigit():  # note
-            self.midi.note_on(self.dt, self.ch, self.offset+int(e), 1)
+            self.midi.note_on(self.dt, self.ch, self.offset + int(e), 1)
             self.dt = self.dt_step()
         elif e == '-':  # continue
             self.dt += self.dt_step()
@@ -74,7 +74,7 @@ class IParser:
             elif e == '':
                 pass  # already stopped
             elif e.isdigit():
-                self.midi.note_off(self.dt, self.ch, self.offset+int(e), 1)
+                self.midi.note_off(self.dt, self.ch, self.offset + int(e), 1)
                 self.dt = 0
             else:
                 pass
@@ -85,7 +85,7 @@ class IParser:
                 # we already checked the validity of the set when parsing.
                 # we only need to check if this is a note, lyrics or '-'
                 if ee.isdigit():
-                    self.midi.note_off(self.dt, self.ch, self.offset+int(ee), 1)
+                    self.midi.note_off(self.dt, self.ch, self.offset + int(ee), 1)
                     self.dt = 0
         else:
             raise Exception("Unexpected object on stack: " + e)
