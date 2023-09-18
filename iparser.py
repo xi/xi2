@@ -1,5 +1,4 @@
-from midi import Midi
-from midi import MidiFile
+import midi
 
 # The tricky part here is the time conversion.
 # and noteOff events
@@ -9,7 +8,7 @@ class IParser:
     """Convert intermediate code to MIDI bytecode."""
 
     def __init__(self, seq, ch=0, offset=60):
-        self.midi = Midi()
+        self.midi = midi.Midi()
         self.ch = ch
         self.offset = offset
         self.dt = 0
@@ -94,8 +93,7 @@ class IParser:
 
 if __name__ == '__main__':
     a = [(('0', '1'), '2'), '4', '5', '-', '', ['0', '4', '7'], '', '', '0', ['3', '-']]
-
-    f = MidiFile()
     ip = IParser(a, 0, 60)
-    f.add_track(ip.midi)
-    f.write('test.mid')
+
+    with open('test.mid', 'wb') as fh:
+        midi.write_file(fh, [ip.midi])

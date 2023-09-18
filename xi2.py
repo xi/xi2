@@ -1,9 +1,8 @@
 import argparse
 import re
 
+import midi
 from iparser import IParser
-from midi import Midi
-from midi import MidiFile
 
 """Parse xi2 code and convert to MIDI."""
 
@@ -103,17 +102,15 @@ for s in ll.split('\n\n'):
     for name, data in tracks.items():
         data += [''] * (l - len(data))
 
-# create midi
-mf = MidiFile()
-
 # create first track with meta infos
-m = Midi()
-m.set_tempo(args.tempo)
-mf.add_track(m)
+midi_tracks = []
+t0 = midi.Midi()
+t0.set_tempo(args.tempo)
+midi_tracks.append(t0)
 
 ch = 0
-for name, track in tracks.iteritems():
-    m = Midi()
+for name, track in tracks.items():
+    m = midi.Midi()
     # write meta info
     m.meta_event(0, 0x04, len(name), name)
     try:
@@ -125,8 +122,8 @@ for name, track in tracks.iteritems():
     ip = IParser(track, ch=ch, offset=args.offset)
     m += ip.midi
     # write
-    mf.add_track(m)
+    midi_tracks.append(m)
     ch += 1
 
-# write to file
-mf.write(args.outfile)
+with open(args.outfile, 'wb') as fh:
+    midi.write_file(fh, midi_tracks)

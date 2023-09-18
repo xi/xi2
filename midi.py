@@ -1,44 +1,35 @@
 # http://www.sonicspot.com/guide/midifiles.html
 
+import io
+
 TIME_DEVISION = 0x00c0 # two bytes
 
 
 class Midi:
     """Create MIDI bytecode from MIDI events."""
 
-    def __init__(self):
-        self._buf = ''
-
-    def __str__(self):
-        return self._buf.encode('hex')
-
-    def __add__(self, other):
-        m = Midi()
-        m._buf = self._buf + other._buf
-        return m
-
-    def write(self, name):
-        f = open(name, 'w')
-        f.write(self._buf)
-        f.close()
+    def __init__(self, fh=None):
+        if fh:
+            self.fh = fh
+        else:
+            self.fh = io.BytesIO()
 
     def write_fixed(self, value, size):
-        if type(value) == type(''):
-            self._buf += (' ' * size + value)[-size:]
-        else:
-            if size != 0:
-                self.write_fixed(value / 0x100, size - 1)
-                self._buf += chr(value % 0x100)
+        if isinstance(value, bytes):
+            self.fh.write((b' ' * size + value)[-size:])
+        elif size != 0:
+            assert isinstance(value, int)
+            self.write_fixed(value >> 8, size - 1)
+            self.fh.write(bytes([value & 0xff]))
 
     def write_variable(self, value, _rec=False):
-        # b = bin(a)[2:]; eval('0b'+''.join([b[k*8:(k+1)*8][1:] for k in range(int(len(b)/8))]))
         if value == 0 and _rec:
             return 0
-        self.write_variable(value / 0x80, True)
+        self.write_variable(value >> 7, True)
         if _rec:
-            self._buf += chr(value % 0x80 + 0x80)
+            self.fh.write(bytes([(value & 0x7f) | 0x80]))
         else:
-            self._buf += chr(value % 0x80)
+            self.fh.write(bytes([value & 0x7f]))
 
     def ch_event(self, dt, event, ch, p1, p2=-1):
         self.write_variable(int(dt * TIME_DEVISION))
@@ -54,7 +45,7 @@ class Midi:
         self.write_variable(length)
         self.write_fixed(data, length)
 
-    def sys_ex(self, dt, length, data):
+    def system_exclusive(self, dt, length, data):
         self.write_variable(int(dt * TIME_DEVISION))
         self.write_fixed(0xf0, 1)
         self.write_variable(length)
@@ -84,34 +75,23 @@ class Midi:
         self.ctrl_event(dt, ch, 0x07, int(vol * 0x7f))
 
 
-class MidiFile(Midi):
-    def __init__(self):
-        Midi.__init__(self)
-        self._tracks = []
-
-    def update(self):
-        self._buf = ''
-        self.write_fixed(0x4D546864, 4)  # chunk ID "MThd"
-        self.write_fixed(6, 4)  # chunk size
-        self.write_fixed(1, 2)  # format type
-        self.write_fixed(len(self._tracks), 2)  # numer of tracks
-        self.write_fixed(TIME_DEVISION, 2)  # time devision
-        for track in self._tracks:
-            self.write_fixed(0x4D54726B, 4)  # chunk ID "MTtr"
-            self.write_fixed(len(track._buf) + 4, 4)  # chunk size
-            self._buf += track._buf
-            self.meta_event(0, 0x2f, 0, '')  # end_track event
-
-    def add_track(self, data, update=True):
-        self._tracks.append(data)
-        if update:
-            self.update()
+def write_file(fh, tracks):
+    f = Midi(fh)
+    f.write_fixed(0x4D546864, 4)  # chunk ID "MThd"
+    f.write_fixed(6, 4)  # chunk size
+    f.write_fixed(1, 2)  # format type
+    f.write_fixed(len(tracks), 2)  # numer of tracks
+    f.write_fixed(TIME_DEVISION, 2)  # time devision
+    for track in tracks:
+        f.write_fixed(0x4D54726B, 4)  # chunk ID "MTtr"
+        buf = track.fh.getvalue()
+        f.write_fixed(len(buf) + 4, 4)  # chunk size
+        f.fh.write(buf)
+        f.meta_event(0, 0x2f, 0, b'')  # end_track event
 
 
 if __name__ == '__main__':
     # Example:
-    f = MidiFile()
-    f.add_track(Midi())
     t = Midi()
     t.set_vol(0, 1, 1)
     t.ctrl_event(0, 1, 0x00, 0)  # setting bank
@@ -121,6 +101,6 @@ if __name__ == '__main__':
     t.note_off(1, 1, 62)
     t.note_on(0, 1, 64)
     t.note_off(1, 1, 64)
-    f.add_track(t)
-    print(f)
-    f.write('test.mid')
+
+    with open('test.mid', 'wb') as fh:
+        write_file(fh, [t])
