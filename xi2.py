@@ -81,8 +81,10 @@ def parse(t):
 # join track parts from different sets
 tracks = dict()
 for s in ll.split('\n\n'):
-    if len(tracks) == 0: l = 0
-    else: l = max([len(t) for t in tracks])
+    if len(tracks) == 0:
+        l = 0
+    else:
+        l = max([len(t) for t in tracks])
     for track in s.split('\n'):
         try:
             (name, data) = track.split(':', 1)
@@ -93,8 +95,10 @@ for s in ll.split('\n\n'):
         if not tracks.has_key(name):
             tracks[name] = [''] * l
         tracks[name] += data
-    if len(tracks) == 0: l = 0
-    else: l = max([len(t) for t in tracks])
+    if len(tracks) == 0:
+        l = 0
+    else:
+        l = max([len(t) for t in tracks])
     for (name,data) in tracks.iteritems():
         data += [''] * (l - len(data))
 
@@ -111,8 +115,10 @@ for name, track in tracks.iteritems():
     m = Midi()
     # write meta info
     m.meta_event(0, 0x04, len(name), name)
-    try: prog = int(name)
-    except ValueError: prog = 0
+    try:
+        prog = int(name)
+    except ValueError:
+        prog = 0
     m.prog_ch(0, ch, prog)
     # write data
     ip = IParser(track, ch=ch, offset=args.offset)

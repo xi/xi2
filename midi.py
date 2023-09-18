@@ -32,7 +32,8 @@ class Midi:
 
     def write_variable(self, n, _rec=False):
         # b = bin(a)[2:]; eval('0b'+''.join([b[k*8:(k+1)*8][1:] for k in range(int(len(b)/8))]))
-        if n == 0 and _rec: return 0
+        if n == 0 and _rec:
+            return 0
         self.write_variable(n / 0x80, True)
         if _rec:
             self._buf += chr(n % 0x80 + 0x80)

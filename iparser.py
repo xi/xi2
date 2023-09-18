@@ -38,11 +38,13 @@ class IParser:
         self.dt_stack.append(len(seq))
         for e in seq:
             if type(e) == type(''):
-                if e != '-': self.stop()
+                if e != '-':
+                    self.stop()
                 self.stack.append(e)
                 self.parse_el(e)
             elif type(e) == type([]):
-                if not '-' in e: self.stop()
+                if '-' not in e:
+                    self.stop()
                 self.stack.append(e)
                 self.parse_set(e)
             elif type(e) == type(()):
@@ -63,7 +65,8 @@ class IParser:
         self.dt = self.dt_step()
 
     def stop(self):
-        if len(self.stack) == 0: return
+        if len(self.stack) == 0:
+            return
         e = self.stack.pop()
         if type(e) == type(''):
             if e == '-':
