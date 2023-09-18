@@ -1,6 +1,6 @@
 # http://www.sonicspot.com/guide/midifiles.html
 
-timeDevision = 0x00c0 # two bytes
+TIME_DEVISION = 0x00c0 # two bytes
 
 
 class Midi:
@@ -22,65 +22,65 @@ class Midi:
         f.write(self._buf)
         f.close()
 
-    def writeFixed(self, n, k):
+    def write_fixed(self, n, k):
         if type(n) == type(''):
             self._buf += (' '*k + n)[-k:]
         else:
             if k != 0:
-                self.writeFixed(n / 0x100, k-1)
+                self.write_fixed(n / 0x100, k-1)
                 self._buf += chr(n % 0x100)
 
-    def writeVariable(self, n, _rec=False):
+    def write_variable(self, n, _rec=False):
         # b = bin(a)[2:]; eval('0b'+''.join([b[k*8:(k+1)*8][1:] for k in range(int(len(b)/8))]))
         if n == 0 and _rec: return 0
-        self.writeVariable(n / 0x80, True)
+        self.write_variable(n / 0x80, True)
         if _rec:
             self._buf += chr(n % 0x80 + 0x80)
         else:
             self._buf += chr(n % 0x80)
 
-    def chEvent(self, dt, event, ch, p1, p2=-1):
-        self.writeVariable(int(dt * timeDevision))
-        self.writeFixed((event << 4) + ch, 1)
-        self.writeFixed(p1, 1)
+    def ch_event(self, dt, event, ch, p1, p2=-1):
+        self.write_variable(int(dt * TIME_DEVISION))
+        self.write_fixed((event << 4) + ch, 1)
+        self.write_fixed(p1, 1)
         if not p2 == -1:
-            self.writeFixed(p2, 1)
+            self.write_fixed(p2, 1)
 
-    def metaEvent(self, dt, event, length, data):
-        self.writeVariable(int(dt * timeDevision))
-        self.writeFixed(0xff, 1)
-        self.writeFixed(event, 1)
-        self.writeVariable(length)
-        self.writeFixed(data, length)
+    def meta_event(self, dt, event, length, data):
+        self.write_variable(int(dt * TIME_DEVISION))
+        self.write_fixed(0xff, 1)
+        self.write_fixed(event, 1)
+        self.write_variable(length)
+        self.write_fixed(data, length)
 
-    def sysEx(self, dt, length, data):
-        self.writeVariable(int(dt * timeDevision))
-        self.writeFixed(0xf0, 1)
-        self.writeVariable(length)
-        self.writeFixed(data, length)
+    def sys_ex(self, dt, length, data):
+        self.write_variable(int(dt * TIME_DEVISION))
+        self.write_fixed(0xf0, 1)
+        self.write_variable(length)
+        self.write_fixed(data, length)
 
-    def setTempo(self, bpm):
+    def set_tempo(self, bpm):
         # midi uses microsec/quarter note
         msqn = 60000000/bpm
-        self.metaEvent(0, 0x51, 3, msqn)
+        self.meta_event(0, 0x51, 3, msqn)
 
-    def noteOn(self, dt, ch, key, vol=1):
-        self.chEvent(dt, 0x9, ch, key, int(vol * 0x7f))
+    def note_on(self, dt, ch, key, vol=1):
+        self.ch_event(dt, 0x9, ch, key, int(vol * 0x7f))
 
-    def noteOff(self, dt, ch, key, vol=1):
-        self.chEvent(dt, 0x8, ch, key, int(vol * 0x7f))
+    def note_off(self, dt, ch, key, vol=1):
+        self.ch_event(dt, 0x8, ch, key, int(vol * 0x7f))
 
     def lyrics(self, dt, s):
-        self.metaEvent(dt, 0x05, len(s), s)
+        self.meta_event(dt, 0x05, len(s), s)
 
-    def progCh(self, dt, ch, prog):
-        self.chEvent(dt, 0xC, ch, prog)
+    def prog_ch(self, dt, ch, prog):
+        self.ch_event(dt, 0xc, ch, prog)
 
-    def ctrlEvent(self, dt, ctrl, v):
-        self.chEvent(dt, 0xB, ch, ctrl, v)
+    def ctrl_event(self, dt, ctrl, v):
+        self.ch_event(dt, 0xb, ch, ctrl, v)
 
-    def setVol(self, dt, ch, vol=1):
-        self.ctrlEvent(dt, ch, 0x07, int(vol * 0x7f))
+    def set_vol(self, dt, ch, vol=1):
+        self.ctrl_event(dt, ch, 0x07, int(vol * 0x7f))
 
 
 class MidiFile(Midi):
@@ -90,18 +90,18 @@ class MidiFile(Midi):
 
     def update(self):
         self._buf = ''
-        self.writeFixed(0x4D546864, 4) # chunk ID "MThd"
-        self.writeFixed(6, 4) # chunk size
-        self.writeFixed(1, 2) # format type
-        self.writeFixed(len(self._tracks), 2) # numer of tracks
-        self.writeFixed(timeDevision, 2) # time devision
+        self.write_fixed(0x4D546864, 4) # chunk ID "MThd"
+        self.write_fixed(6, 4) # chunk size
+        self.write_fixed(1, 2) # format type
+        self.write_fixed(len(self._tracks), 2) # numer of tracks
+        self.write_fixed(TIME_DEVISION, 2) # time devision
         for track in self._tracks:
-            self.writeFixed(0x4D54726B, 4) # chunk ID "MTtr"
-            self.writeFixed(len(track._buf)+4, 4) # chunk size
+            self.write_fixed(0x4D54726B, 4) # chunk ID "MTtr"
+            self.write_fixed(len(track._buf)+4, 4) # chunk size
             self._buf += track._buf
-            self.metaEvent(0, 0x2f, 0, '') # endTrack event
+            self.meta_event(0, 0x2f, 0, '') # end_track event
 
-    def addTrack(self, data, update=True):
+    def add_track(self, data, update=True):
         self._tracks.append(data)
         if update:
             self.update()
@@ -110,16 +110,16 @@ class MidiFile(Midi):
 if __name__ == '__main__':
     # Example:
     f = MidiFile()
-    f.addTrack(Midi())
+    f.add_track(Midi())
     t = Midi()
-    t.setVol(0, 1, 1)
-    t.ctrlEvent(0, 1, 0x00, 0) # setting bank
-    t.noteOn(0.5, 1, 60)
-    t.noteOff(1, 1, 60)
-    t.noteOn(0, 1, 62)
-    t.noteOff(1, 1, 62)
-    t.noteOn(0, 1, 64)
-    t.noteOff(1, 1, 64)
-    f.addTrack(t)
+    t.set_vol(0, 1, 1)
+    t.ctrl_event(0, 1, 0x00, 0) # setting bank
+    t.note_on(0.5, 1, 60)
+    t.note_off(1, 1, 60)
+    t.note_on(0, 1, 62)
+    t.note_off(1, 1, 62)
+    t.note_on(0, 1, 64)
+    t.note_off(1, 1, 64)
+    f.add_track(t)
     print f
     f.write('test.mid')

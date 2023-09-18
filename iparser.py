@@ -12,55 +12,55 @@ class IParser:
         self.ch = ch
         self.offset = offset
         self.dt = 0
-        self.dtStack = []
+        self.dt_stack = []
         self.stack = []
-        self.parseSeq(seq)
+        self.parse_seq(seq)
 
-    def dtStep(self):
+    def dt_step(self):
         a = 1.0
-        for i in self.dtStack[1:]:
+        for i in self.dt_stack[1:]:
             a /= i
         return a
 
-    def parseEl(self, e):
+    def parse_el(self, e):
         if e.isdigit(): # note
-            self.midi.noteOn(self.dt, self.ch, self.offset+int(e), 1)
-            self.dt = self.dtStep()
+            self.midi.note_on(self.dt, self.ch, self.offset+int(e), 1)
+            self.dt = self.dt_step()
         elif e == '-': # continue
-            self.dt += self.dtStep()
+            self.dt += self.dt_step()
         elif e == '': # break
-            self.dt += self.dtStep()
+            self.dt += self.dt_step()
         else: # lyrics
             self.midi.lyrics(self.dt, e.replace('_', ' '))
-            self.dt = self.dtStep()
+            self.dt = self.dt_step()
 
-    def parseSeq(self, seq):
-        self.dtStack.append(len(seq))
+    def parse_seq(self, seq):
+        self.dt_stack.append(len(seq))
         for e in seq:
             if type(e) == type(''):
                 if e != '-': self.stop()
                 self.stack.append(e)
-                self.parseEl(e)
+                self.parse_el(e)
             elif type(e) == type([]):
                 if not '-' in e: self.stop()
                 self.stack.append(e)
-                self.parseSet(e)
+                self.parse_set(e)
             elif type(e) == type(()):
-                self.parseSeq(e)
+                self.parse_seq(e)
             else:
                 raise Exception("unknown element: " + e)
-        self.dtStack.pop()
+        self.dt_stack.pop()
 
-    def parseSet(self, s):
+    def parse_set(self, s):
         for e in s:
             if type(e) != type(''):
                 raise Exception("only elements are allowed inside sets: " + e)
             elif e == '':
                 raise Exception("Breaks are not allowed inside sets!")
             else:
-                self.parseEl(e)
+                self.parse_el(e)
             self.dt = 0
-        self.dt = self.dtStep()
+        self.dt = self.dt_step()
 
     def stop(self):
         if len(self.stack) == 0: return
@@ -71,7 +71,7 @@ class IParser:
             elif e == '':
                 pass # already stopped
             elif e.isdigit():
-                self.midi.noteOff(self.dt, self.ch, self.offset+int(e), 1)
+                self.midi.note_off(self.dt, self.ch, self.offset+int(e), 1)
                 self.dt = 0
             else:
                 pass
@@ -82,7 +82,7 @@ class IParser:
                 # we already checked the validity of the set when parsing.
                 # we only need to check if this is a note, lyrics or '-'
                 if ee.isdigit():
-                    self.midi.noteOff(self.dt, self.ch, self.offset+int(ee), 1)
+                    self.midi.note_off(self.dt, self.ch, self.offset+int(ee), 1)
                     self.dt = 0
         else:
             raise Exception("Unexpected object on stack: " + e)
@@ -93,5 +93,5 @@ if __name__ == '__main__':
 
     f = MidiFile()
     ip = IParser(a, 0, 60)
-    f.addTrack(ip.midi)
+    f.add_track(ip.midi)
     f.write('test.mid')

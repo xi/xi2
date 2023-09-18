@@ -103,22 +103,22 @@ mf = MidiFile()
 
 # create first track with meta infos
 m = Midi()
-m.setTempo(args.tempo)
-mf.addTrack(m)
+m.set_tempo(args.tempo)
+mf.add_track(m)
 
 ch = 0
 for name, track in tracks.iteritems():
     m = Midi()
     # write meta info
-    m.metaEvent(0, 0x04, len(name), name)
+    m.meta_event(0, 0x04, len(name), name)
     try: prog = int(name)
     except ValueError: prog = 0
-    m.progCh(0, ch, prog)
+    m.prog_ch(0, ch, prog)
     # write data
     ip = IParser(track, ch=ch, offset=args.offset)
     m += ip.midi
     # write
-    mf.addTrack(m)
+    mf.add_track(m)
     ch += 1
 
 # write to file
