@@ -18,7 +18,7 @@ args = parser.parse_args()
 def length(data):
 	data = re.sub('{[^}]*}', '', data)
 	data = re.sub('\([^\)]*\)', '', data)
-	return len(data.split(',')) - 1	
+	return len(data.split(',')) - 1
 
 f = open(args.infile)
 lines = f.readlines()
@@ -87,7 +87,11 @@ for s in ll.split('\n\n'):
 	if len(tracks) == 0: l = 0
 	else: l = max([len(t) for t in tracks])
 	for track in s.split('\n'):
-		(name, data) = track.split(':', 1)
+		try:
+			(name, data) = track.split(':', 1)
+		except Exception, e:
+			print track
+			raise e
 		data = parse(data)
 		if not tracks.has_key(name):
 			tracks[name] = [''] * l
