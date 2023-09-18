@@ -37,17 +37,17 @@ class IParser:
     def parse_seq(self, seq):
         self.dt_stack.append(len(seq))
         for e in seq:
-            if type(e) == type(''):
+            if isinstance(e, str):
                 if e != '-':
                     self.stop()
                 self.stack.append(e)
                 self.parse_el(e)
-            elif type(e) == type([]):
+            elif isinstance(e, list):
                 if '-' not in e:
                     self.stop()
                 self.stack.append(e)
                 self.parse_set(e)
-            elif type(e) == type(()):
+            elif isinstance(e, tuple):
                 self.parse_seq(e)
             else:
                 raise Exception("unknown element: " + e)
@@ -68,7 +68,7 @@ class IParser:
         if len(self.stack) == 0:
             return
         e = self.stack.pop()
-        if type(e) == type(''):
+        if isinstance(e, str):
             if e == '-':
                 self.stop()
             elif e == '':
@@ -78,7 +78,7 @@ class IParser:
                 self.dt = 0
             else:
                 pass
-        elif type(e) == type([]):
+        elif isinstance(e, list):
             if '-' in e:
                 self.stop()
             for ee in e:
