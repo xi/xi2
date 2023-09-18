@@ -1,11 +1,10 @@
-#!/usr/bin/env python
-
 # http://www.sonicspot.com/guide/midifiles.html
 
 timeDevision = 0x00c0 # two bytes
 
+
 class Midi:
-# creates midi bytecode from midi events
+    """Create MIDI bytecode from MIDI events."""
 
     def __init__(self):
         self._buf = ''
@@ -83,8 +82,8 @@ class Midi:
     def setVol(self, dt, ch, vol=1):
         self.ctrlEvent(dt, ch, 0x07, int(vol * 0x7f))
 
-class MidiFile(Midi):
 
+class MidiFile(Midi):
     def __init__(self):
         Midi.__init__(self)
         self._tracks = []
@@ -106,6 +105,7 @@ class MidiFile(Midi):
         self._tracks.append(data)
         if update:
             self.update()
+
 
 if __name__ == '__main__':
     # Example:

@@ -1,15 +1,11 @@
-#!/usr/bin/env python
-
 from midi import *
 
-"""
-The tricky part here is the time conversion.
-and noteOff events
-"""
+# The tricky part here is the time conversion.
+# and noteOff events
+
 
 class IParser:
-# creates midi events from intermediate code
-# and than uses midi to create midi bytecode
+    """Convert intermediate code to MIDI bytecode."""
 
     def __init__(self, seq, ch=0, offset=60):
         self.midi = Midi()
@@ -90,6 +86,7 @@ class IParser:
                     self.dt = 0
         else:
             raise Exception("Unexpected object on stack: " + e)
+
 
 if __name__ == '__main__':
     a = [(('0', '1'), '2'), '4', '5', '-', '', ['0', '4', '7'], '', '', '0', ['3', '-']]

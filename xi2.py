@@ -1,12 +1,9 @@
-#!/usr/bin/env python
-
+import argparse
 import re
 from iparser import IParser
 from midi import Midi, MidiFile
-import argparse
 
-# creates indermediate code from xi2 code
-# and than uses iparser to create midi bytecode
+"""Parse xi2 code and convert to MIDI."""
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-t', '--tempo', help="tempo in bpm", default=120, type=int)
