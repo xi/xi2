@@ -57,7 +57,7 @@ ll = re.sub('\\\\n', '\n', ll)
 ll = re.sub('\n*$', '', ll)
 
 def parse(t):
-    string = '';
+    string = ''
     stack = [[]]
     for c in t:
         #print stack, string, c
