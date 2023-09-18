@@ -22,23 +22,23 @@ class Midi:
         f.write(self._buf)
         f.close()
 
-    def write_fixed(self, n, k):
-        if type(n) == type(''):
-            self._buf += (' ' * k + n)[-k:]
+    def write_fixed(self, value, size):
+        if type(value) == type(''):
+            self._buf += (' ' * size + value)[-size:]
         else:
-            if k != 0:
-                self.write_fixed(n / 0x100, k - 1)
-                self._buf += chr(n % 0x100)
+            if size != 0:
+                self.write_fixed(value / 0x100, size - 1)
+                self._buf += chr(value % 0x100)
 
-    def write_variable(self, n, _rec=False):
+    def write_variable(self, value, _rec=False):
         # b = bin(a)[2:]; eval('0b'+''.join([b[k*8:(k+1)*8][1:] for k in range(int(len(b)/8))]))
-        if n == 0 and _rec:
+        if value == 0 and _rec:
             return 0
-        self.write_variable(n / 0x80, True)
+        self.write_variable(value / 0x80, True)
         if _rec:
-            self._buf += chr(n % 0x80 + 0x80)
+            self._buf += chr(value % 0x80 + 0x80)
         else:
-            self._buf += chr(n % 0x80)
+            self._buf += chr(value % 0x80)
 
     def ch_event(self, dt, event, ch, p1, p2=-1):
         self.write_variable(int(dt * TIME_DEVISION))
