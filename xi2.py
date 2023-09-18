@@ -16,9 +16,9 @@ parser.add_argument('outfile')
 args = parser.parse_args()
 
 def length(data):
-	data = re.sub('{[^}]*}', '', data)
-	data = re.sub('\([^\)]*\)', '', data)
-	return len(data.split(',')) - 1
+    data = re.sub('{[^}]*}', '', data)
+    data = re.sub('\([^\)]*\)', '', data)
+    return len(data.split(',')) - 1
 
 f = open(args.infile)
 lines = f.readlines()
@@ -38,16 +38,16 @@ ll = re.sub('//[^\n]*\n', '', ll)
 # expand macros
 ll = re.sub('\n', '\\\\n', ll)
 while re.search('(\[[^\]]*\]):(.*)', ll):
-	match = re.search('(\[[^\]]*\]):(.*)', ll)
-	(key, after) = match.groups()
-	if after.startswith('<<'):
-		eol = after.split('\\n',1)[0][2:]
-		val = after.split(eol,2)[1]
-		ll = re.sub(re.escape("%s:<<%s%s%s" % (key, eol, val, eol)), '', ll)
-	else:
-		val = after.split('\\n',1)[0]
-		ll = re.sub(re.escape("%s:%s" % (key, val)), '', ll)
-	ll = re.sub(re.escape(key), val, ll)
+    match = re.search('(\[[^\]]*\]):(.*)', ll)
+    (key, after) = match.groups()
+    if after.startswith('<<'):
+        eol = after.split('\\n',1)[0][2:]
+        val = after.split(eol,2)[1]
+        ll = re.sub(re.escape("%s:<<%s%s%s" % (key, eol, val, eol)), '', ll)
+    else:
+        val = after.split('\\n',1)[0]
+        ll = re.sub(re.escape("%s:%s" % (key, val)), '', ll)
+    ll = re.sub(re.escape(key), val, ll)
 ll = re.sub('\\\\n', '\n', ll)
 
 # remove trailing newlines
@@ -60,46 +60,46 @@ ll = re.sub('\\\\n', '\n', ll)
 ll = re.sub('\n*$', '', ll)
 
 def parse(t):
-	string = '';
-	stack = [[]]
-	for c in t:
-		#print stack, string, c
-		if c == '{':
-			stack.append([])
-		elif c == '}':
-			stack[-1].append(string)
-			string = tuple(stack.pop())
-		elif c == '(':
-			stack.append([])
-		elif c == ')':
-			stack[-1].append(string)
-			string = stack.pop()
-		elif c == ',':
-			stack[-1].append(string)
-			string = ''
-		else:
-			string += c
-	return stack[0]
+    string = '';
+    stack = [[]]
+    for c in t:
+        #print stack, string, c
+        if c == '{':
+            stack.append([])
+        elif c == '}':
+            stack[-1].append(string)
+            string = tuple(stack.pop())
+        elif c == '(':
+            stack.append([])
+        elif c == ')':
+            stack[-1].append(string)
+            string = stack.pop()
+        elif c == ',':
+            stack[-1].append(string)
+            string = ''
+        else:
+            string += c
+    return stack[0]
 
 # join track parts from different sets
 tracks = dict()
 for s in ll.split('\n\n'):
-	if len(tracks) == 0: l = 0
-	else: l = max([len(t) for t in tracks])
-	for track in s.split('\n'):
-		try:
-			(name, data) = track.split(':', 1)
-		except Exception, e:
-			print track
-			raise e
-		data = parse(data)
-		if not tracks.has_key(name):
-			tracks[name] = [''] * l
-		tracks[name] += data
-	if len(tracks) == 0: l = 0
-	else: l = max([len(t) for t in tracks])
-	for (name,data) in tracks.iteritems():
-		data += [''] * (l - len(data))
+    if len(tracks) == 0: l = 0
+    else: l = max([len(t) for t in tracks])
+    for track in s.split('\n'):
+        try:
+            (name, data) = track.split(':', 1)
+        except Exception, e:
+            print track
+            raise e
+        data = parse(data)
+        if not tracks.has_key(name):
+            tracks[name] = [''] * l
+        tracks[name] += data
+    if len(tracks) == 0: l = 0
+    else: l = max([len(t) for t in tracks])
+    for (name,data) in tracks.iteritems():
+        data += [''] * (l - len(data))
 
 # create midi
 mf = MidiFile()
@@ -111,18 +111,18 @@ mf.addTrack(m)
 
 ch = 0
 for name, track in tracks.iteritems():
-	m = Midi()
-	# write meta info
-	m.metaEvent(0, 0x04, len(name), name)
-	try: prog = int(name)
-	except ValueError: prog = 0
-	m.progCh(0, ch, prog)
-	# write data
-	ip = IParser(track, ch=ch, offset=args.offset)
-	m += ip.midi
-	# write
-	mf.addTrack(m)
-	ch += 1
+    m = Midi()
+    # write meta info
+    m.metaEvent(0, 0x04, len(name), name)
+    try: prog = int(name)
+    except ValueError: prog = 0
+    m.progCh(0, ch, prog)
+    # write data
+    ip = IParser(track, ch=ch, offset=args.offset)
+    m += ip.midi
+    # write
+    mf.addTrack(m)
+    ch += 1
 
 # write to file
 mf.write(args.outfile)
