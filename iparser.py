@@ -23,14 +23,14 @@ class IParser:
         return a
 
     def parse_el(self, e):
-        if e.isdigit(): # note
+        if e.isdigit():  # note
             self.midi.note_on(self.dt, self.ch, self.offset+int(e), 1)
             self.dt = self.dt_step()
-        elif e == '-': # continue
+        elif e == '-':  # continue
             self.dt += self.dt_step()
-        elif e == '': # break
+        elif e == '':  # break
             self.dt += self.dt_step()
-        else: # lyrics
+        else:  # lyrics
             self.midi.lyrics(self.dt, e.replace('_', ' '))
             self.dt = self.dt_step()
 
@@ -72,7 +72,7 @@ class IParser:
             if e == '-':
                 self.stop()
             elif e == '':
-                pass # already stopped
+                pass  # already stopped
             elif e.isdigit():
                 self.midi.note_off(self.dt, self.ch, self.offset+int(e), 1)
                 self.dt = 0

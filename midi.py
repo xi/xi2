@@ -91,16 +91,16 @@ class MidiFile(Midi):
 
     def update(self):
         self._buf = ''
-        self.write_fixed(0x4D546864, 4) # chunk ID "MThd"
-        self.write_fixed(6, 4) # chunk size
-        self.write_fixed(1, 2) # format type
-        self.write_fixed(len(self._tracks), 2) # numer of tracks
-        self.write_fixed(TIME_DEVISION, 2) # time devision
+        self.write_fixed(0x4D546864, 4)  # chunk ID "MThd"
+        self.write_fixed(6, 4)  # chunk size
+        self.write_fixed(1, 2)  # format type
+        self.write_fixed(len(self._tracks), 2)  # numer of tracks
+        self.write_fixed(TIME_DEVISION, 2)  # time devision
         for track in self._tracks:
-            self.write_fixed(0x4D54726B, 4) # chunk ID "MTtr"
-            self.write_fixed(len(track._buf)+4, 4) # chunk size
+            self.write_fixed(0x4D54726B, 4)  # chunk ID "MTtr"
+            self.write_fixed(len(track._buf)+4, 4)  # chunk size
             self._buf += track._buf
-            self.meta_event(0, 0x2f, 0, '') # end_track event
+            self.meta_event(0, 0x2f, 0, '')  # end_track event
 
     def add_track(self, data, update=True):
         self._tracks.append(data)
@@ -114,7 +114,7 @@ if __name__ == '__main__':
     f.add_track(Midi())
     t = Midi()
     t.set_vol(0, 1, 1)
-    t.ctrl_event(0, 1, 0x00, 0) # setting bank
+    t.ctrl_event(0, 1, 0x00, 0)  # setting bank
     t.note_on(0.5, 1, 60)
     t.note_off(1, 1, 60)
     t.note_on(0, 1, 62)
