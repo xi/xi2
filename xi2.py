@@ -62,7 +62,6 @@ def parse(t):
     string = ''
     stack = [[]]
     for c in t:
-        #print stack, string, c
         if c == '{':
             stack.append([])
         elif c == '}':
