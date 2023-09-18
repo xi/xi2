@@ -112,7 +112,7 @@ ch = 0
 for name, track in tracks.items():
     m = midi.Midi()
     # write meta info
-    m.meta_event(0, 0x04, len(name), name)
+    m.meta_event_str(0, 0x04, name)
     try:
         prog = int(name)
     except ValueError:

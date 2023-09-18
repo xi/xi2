@@ -45,6 +45,10 @@ class Midi:
         self.write_variable(length)
         self.write_fixed(data, length)
 
+    def meta_event_str(self, dt, event, s):
+        data = s.encode('ascii')
+        self.meta_event(dt, event, len(data), data)
+
     def system_exclusive(self, dt, length, data):
         self.write_variable(int(dt * TIME_DEVISION))
         self.write_fixed(0xf0, 1)
@@ -63,7 +67,7 @@ class Midi:
         self.ch_event(dt, 0x8, ch, key, int(vol * 0x7f))
 
     def lyrics(self, dt, s):
-        self.meta_event(dt, 0x05, len(s), s)
+        self.meta_event_str(dt, 0x05, s)
 
     def prog_ch(self, dt, ch, prog):
         self.ch_event(dt, 0xc, ch, prog)
