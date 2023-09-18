@@ -119,8 +119,7 @@ for name, track in tracks.items():
         prog = 0
     m.prog_ch(0, ch, prog)
     # write data
-    ip = IParser(track, ch=ch, offset=args.offset)
-    m += ip.midi
+    IParser(m, track, ch=ch, offset=args.offset)
     # write
     midi_tracks.append(m)
     ch += 1

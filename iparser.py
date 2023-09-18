@@ -7,8 +7,8 @@ import midi
 class IParser:
     """Convert intermediate code to MIDI bytecode."""
 
-    def __init__(self, seq, ch=0, offset=60):
-        self.midi = midi.Midi()
+    def __init__(self, midi, seq, ch=0, offset=60):
+        self.midi = midi
         self.ch = ch
         self.offset = offset
         self.dt = 0
@@ -93,7 +93,8 @@ class IParser:
 
 if __name__ == '__main__':
     a = [(('0', '1'), '2'), '4', '5', '-', '', ['0', '4', '7'], '', '', '0', ['3', '-']]
-    ip = IParser(a, 0, 60)
+    t = midi.Midi()
+    ip = IParser(a, t, 0, 60)
 
     with open('test.mid', 'wb') as fh:
-        midi.write_file(fh, [ip.midi])
+        midi.write_file(fh, [t])
