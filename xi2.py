@@ -1,7 +1,9 @@
 import argparse
 import re
+
 from iparser import IParser
-from midi import Midi, MidiFile
+from midi import Midi
+from midi import MidiFile
 
 """Parse xi2 code and convert to MIDI."""
 

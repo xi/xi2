@@ -1,4 +1,5 @@
-from midi import *
+from midi import Midi
+from midi import MidiFile
 
 # The tricky part here is the time conversion.
 # and noteOff events
