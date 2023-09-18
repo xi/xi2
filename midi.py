@@ -77,7 +77,7 @@ class Midi:
     def prog_ch(self, dt, ch, prog):
         self.ch_event(dt, 0xc, ch, prog)
 
-    def ctrl_event(self, dt, ctrl, v):
+    def ctrl_event(self, dt, ch, ctrl, v):
         self.ch_event(dt, 0xb, ch, ctrl, v)
 
     def set_vol(self, dt, ch, vol=1):
