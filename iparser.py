@@ -50,15 +50,15 @@ class IParser:
             elif isinstance(e, tuple):
                 self.parse_seq(e)
             else:
-                raise Exception("unknown element: " + e)
+                raise ValueError("unknown element: " + e)
         self.dt_stack.pop()
 
     def parse_set(self, s):
         for e in s:
             if type(e) != type(''):
-                raise Exception("only elements are allowed inside sets: " + e)
+                raise ValueError("only elements are allowed inside sets: " + e)
             elif e == '':
-                raise Exception("Breaks are not allowed inside sets!")
+                raise ValueError("Breaks are not allowed inside sets!")
             else:
                 self.parse_el(e)
             self.dt = 0
@@ -88,7 +88,7 @@ class IParser:
                     self.midi.note_off(self.dt, self.ch, self.offset + int(ee), 1)
                     self.dt = 0
         else:
-            raise Exception("Unexpected object on stack: " + e)
+            assert False, "Unexpected object on stack: " + e
 
 
 if __name__ == '__main__':
