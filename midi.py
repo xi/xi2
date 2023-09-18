@@ -122,5 +122,5 @@ if __name__ == '__main__':
     t.note_on(0, 1, 64)
     t.note_off(1, 1, 64)
     f.add_track(t)
-    print f
+    print(f)
     f.write('test.mid')

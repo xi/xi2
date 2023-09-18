@@ -89,18 +89,18 @@ for s in ll.split('\n\n'):
     for track in s.split('\n'):
         try:
             (name, data) = track.split(':', 1)
-        except Exception, e:
-            print track
+        except Exception as e:
+            print(track)
             raise e
         data = parse(data)
-        if not tracks.has_key(name):
+        if name not in tracks:
             tracks[name] = [''] * l
         tracks[name] += data
     if len(tracks) == 0:
         l = 0
     else:
         l = max([len(t) for t in tracks])
-    for (name,data) in tracks.iteritems():
+    for name, data in tracks.items():
         data += [''] * (l - len(data))
 
 # create midi
