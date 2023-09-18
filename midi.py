@@ -1,4 +1,4 @@
-# http://www.sonicspot.com/guide/midifiles.html
+# https://web.archive.org/web/20131030010909/http://www.sonicspot.com/guide/midifiles.html
 
 import io
 
