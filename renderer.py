@@ -4,7 +4,7 @@ import midi
 # and noteOff events
 
 
-class IParser:
+class Renderer:
     """Convert intermediate code to MIDI bytecode."""
 
     def __init__(self, midi, seq, ch=0, offset=60):
@@ -14,7 +14,7 @@ class IParser:
         self.dt = 0
         self.dt_stack = []
         self.stack = []
-        self.parse_seq(seq)
+        self.render_seq(seq)
 
     def dt_step(self):
         a = 1.0
@@ -22,11 +22,11 @@ class IParser:
             a /= i
         return a
 
-    def parse_el(self, e):
+    def render_element(self, e):
         if e.isdigit():  # note
             self.midi.note_on(self.dt, self.ch, self.offset + int(e), 1)
             self.dt = self.dt_step()
-        elif e == '-':  # continue
+        elif e == '-':  # hold
             self.dt += self.dt_step()
         elif e == '':  # break
             self.dt += self.dt_step()
@@ -34,33 +34,33 @@ class IParser:
             self.midi.lyrics(self.dt, e.replace('_', ' '))
             self.dt = self.dt_step()
 
-    def parse_seq(self, seq):
+    def render_seq(self, seq):
         self.dt_stack.append(len(seq))
         for e in seq:
             if isinstance(e, str):
                 if e != '-':
                     self.stop()
                 self.stack.append(e)
-                self.parse_el(e)
+                self.render_element(e)
             elif isinstance(e, set):
                 if '-' not in e:
                     self.stop()
                 self.stack.append(e)
-                self.parse_set(e)
+                self.render_chord(e)
             elif isinstance(e, list):
-                self.parse_seq(e)
+                self.render_seq(e)
             else:
                 raise ValueError("unknown element: " + e)
         self.dt_stack.pop()
 
-    def parse_set(self, s):
+    def render_chord(self, s):
         for e in s:
-            if type(e) != type(''):
-                raise ValueError("only elements are allowed inside sets: " + e)
+            if not isinstance(e, str):
+                raise ValueError("only elements are allowed inside chords: " + e)
             elif e == '':
                 raise ValueError("Breaks are not allowed inside sets!")
             else:
-                self.parse_el(e)
+                self.render_element(e)
             self.dt = 0
         self.dt = self.dt_step()
 
@@ -94,7 +94,7 @@ class IParser:
 if __name__ == '__main__':
     a = [[['0', '1'], '2'], '4', '5', '-', '', {'0', '4', '7'}, '', '', '0', {'3', '-'}]
     t = midi.Midi()
-    ip = IParser(t, a, 0, 60)
+    ip = Renderer(t, a, 0, 60)
 
     with open('test.mid', 'wb') as fh:
         midi.write_file(fh, [t])
