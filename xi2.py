@@ -2,6 +2,7 @@
 
 import argparse
 import re
+import sys
 
 import midi
 from renderer import render
@@ -80,8 +81,11 @@ def parse_args():
 if __name__ == '__main__':
     args = parse_args()
 
-    with open(args.infile) as fh:
-        s = fh.read()
+    if args.infile == '-':
+        s = sys.stdin.read()
+    else:
+        with open(args.infile) as fh:
+            s = fh.read()
     tracks = parse(s)
 
     # create first track with meta infos
@@ -101,5 +105,8 @@ if __name__ == '__main__':
         render(tracks[name], m, ch=ch, offset=args.offset)
         midi_tracks.append(m)
 
-    with open(args.outfile, 'wb') as fh:
-        midi.write_file(fh, midi_tracks)
+    if args.outfile == '-':
+        midi.write_file(sys.stdout.buffer, midi_tracks)
+    else:
+        with open(args.outfile, 'wb') as fh:
+            midi.write_file(fh, midi_tracks)
