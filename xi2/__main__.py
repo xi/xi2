@@ -4,8 +4,8 @@ import argparse
 import re
 import sys
 
-import midi
-from renderer import render
+from . import midi
+from .renderer import render
 
 
 def parse_seq(t):
@@ -77,7 +77,7 @@ def parse_args():
     return parser.parse_args()
 
 
-if __name__ == '__main__':
+def main():
     args = parse_args()
 
     if args.infile == '-':
@@ -115,3 +115,7 @@ if __name__ == '__main__':
     else:
         with open(args.outfile, 'wb') as fh:
             midi.write_file(fh, midi_tracks)
+
+
+if __name__ == '__main__':
+    main()

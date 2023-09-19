@@ -1,4 +1,4 @@
-import midi
+from . import midi
 
 
 class Renderer:
