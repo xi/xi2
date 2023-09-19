@@ -42,12 +42,12 @@ class IParser:
                     self.stop()
                 self.stack.append(e)
                 self.parse_el(e)
-            elif isinstance(e, list):
+            elif isinstance(e, set):
                 if '-' not in e:
                     self.stop()
                 self.stack.append(e)
                 self.parse_set(e)
-            elif isinstance(e, tuple):
+            elif isinstance(e, list):
                 self.parse_seq(e)
             else:
                 raise ValueError("unknown element: " + e)
@@ -78,7 +78,7 @@ class IParser:
                 self.dt = 0
             else:
                 pass
-        elif isinstance(e, list):
+        elif isinstance(e, set):
             if '-' in e:
                 self.stop()
             for ee in e:
@@ -92,7 +92,7 @@ class IParser:
 
 
 if __name__ == '__main__':
-    a = [(('0', '1'), '2'), '4', '5', '-', '', ['0', '4', '7'], '', '', '0', ['3', '-']]
+    a = [[['0', '1'], '2'], '4', '5', '-', '', {'0', '4', '7'}, '', '', '0', {'3', '-'}]
     t = midi.Midi()
     ip = IParser(t, a, 0, 60)
 

@@ -11,16 +11,16 @@ def parse(t):
     string = ''
     stack = [[]]
     for c in t:
-        if c == '{':
-            stack.append([])
-        elif c == '}':
-            stack[-1].append(string)
-            string = tuple(stack.pop())
-        elif c == '(':
+        if c == '(':
             stack.append([])
         elif c == ')':
             stack[-1].append(string)
             string = stack.pop()
+        elif c == '{':
+            stack.append([])
+        elif c == '}':
+            stack[-1].append(string)
+            string = set(stack.pop())
         elif c == ',':
             stack[-1].append(string)
             string = ''
