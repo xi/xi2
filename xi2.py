@@ -7,7 +7,7 @@ import midi
 from renderer import render
 
 
-def parse(t):
+def parse_seq(t):
     string = ''
     stack = [[]]
     for c in t:
@@ -29,6 +29,45 @@ def parse(t):
     return stack[0]
 
 
+def expand_macros(s):
+    s = s.replace('\n', r'\n')
+    while re.search(r'(\[[^\]]*\]):(.*)', s):
+        match = re.search(r'(\[[^\]]*\]):(.*)', s)
+        key, after = match.groups()
+        if after.startswith(r'\n'):
+            val = after.split('[end]', 1)[0]
+            s = s.replace('%s:%s[end]' % (key, val), '')
+        else:
+            val = after.split(r'\n', 1)[0]
+            s = s.replace('%s:%s' % (key, val), '')
+        s = s.replace(key, val)
+    return s.replace(r'\n', '\n')
+
+
+def parse(s):
+    s = re.sub('[ \t]', '', s)
+    s = re.sub('#[^\n]*', '', s)
+    s = expand_macros(s)
+    s = s.strip('\n')
+    s = re.sub('\n\n+', '\n\n', s)
+
+    tracks = {}
+    for section in s.split('\n\n'):
+        length = max([len(t) for t in tracks.values()], default=0)
+        for track in section.split('\n'):
+            try:
+                name, data = track.split(':', 1)
+            except ValueError:
+                print(track)
+                raise
+            if name not in tracks:
+                tracks[name] = []
+            tracks[name] += [''] * (length - len(tracks[name]))
+            tracks[name] += parse_seq(data)
+
+    return tracks
+
+
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('-t', '--tempo', help='tempo in bpm', default=120, type=int)
@@ -42,46 +81,8 @@ if __name__ == '__main__':
     args = parse_args()
 
     with open(args.infile) as fh:
-        lines = fh.readlines()
-
-    ll = ''.join(lines)
-    # remove whitespace
-    ll = re.sub('[ \t]', '', ll)
-    # remove comments
-    ll = re.sub('#[^\n]*', '', ll)
-
-    # expand macros
-    ll = ll.replace('\n', r'\n')
-    while re.search(r'(\[[^\]]*\]):(.*)', ll):
-        match = re.search(r'(\[[^\]]*\]):(.*)', ll)
-        key, after = match.groups()
-        if after.startswith(r'\n'):
-            val = after.split('[end]', 1)[0]
-            ll = ll.replace('%s:%s[end]' % (key, val), '')
-        else:
-            val = after.split(r'\n', 1)[0]
-            ll = ll.replace('%s:%s' % (key, val), '')
-        ll = ll.replace(key, val)
-    ll = ll.replace(r'\n', '\n')
-
-    # trim newlines
-    ll = ll.strip('\n')
-    ll = re.sub('\n\n+', '\n\n', ll)
-
-    # join tracks from different sections
-    tracks = dict()
-    for section in ll.split('\n\n'):
-        length = max([len(t) for t in tracks.values()], default=0)
-        for track in section.split('\n'):
-            try:
-                name, data = track.split(':', 1)
-            except Exception:
-                print(track)
-                raise
-            if name not in tracks:
-                tracks[name] = []
-            tracks[name] += [''] * (length - len(tracks[name]))
-            tracks[name] += parse(data)
+        s = fh.read()
+    tracks = parse(s)
 
     # create first track with meta infos
     midi_tracks = []
@@ -89,21 +90,16 @@ if __name__ == '__main__':
     t0.set_tempo(args.tempo)
     midi_tracks.append(t0)
 
-    ch = 0
-    for name, track in tracks.items():
+    for ch, name in enumerate(tracks):
         m = midi.Midi()
-        # write meta info
         m.meta_event_str(0, 0x04, name)
         try:
             prog = int(name)
         except ValueError:
             prog = 0
         m.prog_ch(0, ch, prog)
-        # write data
-        render(track, m, ch=ch, offset=args.offset)
-        # write
+        render(tracks[name], m, ch=ch, offset=args.offset)
         midi_tracks.append(m)
-        ch += 1
 
     with open(args.outfile, 'wb') as fh:
         midi.write_file(fh, midi_tracks)
