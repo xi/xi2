@@ -47,13 +47,8 @@ if __name__ == '__main__':
     ll = ''.join(lines)
     # remove whitespace
     ll = re.sub('[ \t]', '', ll)
-    # remove c++ style comments
-    # we have to escape linebreaks
-    ll = re.sub('\n', r'\\n', ll)
-    ll = re.sub('/\*[^(\*)]*\*/', '', ll)
-    ll = re.sub('\\\\n', '\n', ll)
-    # remove c style comments
-    ll = re.sub('//[^\n]*\n', '', ll)
+    # remove comments
+    ll = re.sub('#[^\n]*', '', ll)
 
     # expand macros
     ll = re.sub('\n', '\\\\n', ll)
