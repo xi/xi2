@@ -49,7 +49,7 @@ if __name__ == '__main__':
     ll = re.sub('[ \t]', '', ll)
     # remove c++ style comments
     # we have to escape linebreaks
-    ll = re.sub('\n', '\\\\n', ll)
+    ll = re.sub('\n', r'\\n', ll)
     ll = re.sub('/\*[^(\*)]*\*/', '', ll)
     ll = re.sub('\\\\n', '\n', ll)
     # remove c style comments
@@ -70,14 +70,9 @@ if __name__ == '__main__':
         ll = re.sub(re.escape(key), val, ll)
     ll = re.sub('\\\\n', '\n', ll)
 
-    # remove trailing newlines
-    ll = re.sub('^\n*', '', ll)
-    # remove \n\n+
-    ll = re.sub('\n', '\\\\n', ll)
-    ll = re.sub('\\\\n(\\\\n)+', '\\\\n\\\\n', ll)
-    ll = re.sub('\\\\n', '\n', ll)
-    # remove newlines at the end
-    ll = re.sub('\n*$', '', ll)
+    # trim newlines
+    ll = ll.strip('\n')
+    ll = re.sub('\n\n+', '\n\n', ll)
 
     # join track parts from different sets
     tracks = dict()
@@ -89,9 +84,9 @@ if __name__ == '__main__':
         for track in s.split('\n'):
             try:
                 (name, data) = track.split(':', 1)
-            except Exception as e:
+            except Exception:
                 print(track)
-                raise e
+                raise
             data = parse(data)
             if name not in tracks:
                 tracks[name] = [''] * l

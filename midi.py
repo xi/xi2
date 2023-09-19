@@ -57,7 +57,7 @@ class Midi:
 
     def set_tempo(self, bpm):
         # midi uses microsec/quarter note
-        msqn = 60000000 // bpm
+        msqn = 60_000_000 // bpm
         self.meta_event(0, 0x51, 3, msqn)
 
     def note_on(self, dt, ch, key, vol=1):
@@ -84,12 +84,12 @@ def write_file(fh, tracks):
     f.write_fixed(0x4D546864, 4)  # chunk ID "MThd"
     f.write_fixed(6, 4)  # chunk size
     f.write_fixed(1, 2)  # format type
-    f.write_fixed(len(tracks), 2)  # numer of tracks
-    f.write_fixed(TIME_DEVISION, 2)  # time devision
+    f.write_fixed(len(tracks), 2)
+    f.write_fixed(TIME_DEVISION, 2)
     for track in tracks:
         f.write_fixed(0x4D54726B, 4)  # chunk ID "MTtr"
         buf = track.fh.getvalue()
-        f.write_fixed(len(buf) + 4, 4)  # chunk size
+        f.write_fixed(len(buf) + 4, 4)
         f.fh.write(buf)
         f.meta_event(0, 0x2f, 0, b'')  # end_track event
 
