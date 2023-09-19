@@ -7,12 +7,6 @@ import midi
 from iparser import IParser
 
 
-def length(data):
-    data = re.sub('{[^}]*}', '', data)
-    data = re.sub('\([^\)]*\)', '', data)
-    return len(data.split(',')) - 1
-
-
 def parse(t):
     string = ''
     stack = [[]]
