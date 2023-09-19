@@ -4,7 +4,7 @@ import argparse
 import re
 
 import midi
-from renderer import Renderer
+from renderer import render
 
 
 def parse(t):
@@ -115,7 +115,7 @@ if __name__ == '__main__':
             prog = 0
         m.prog_ch(0, ch, prog)
         # write data
-        Renderer(m, track, ch=ch, offset=args.offset)
+        render(track, m, ch=ch, offset=args.offset)
         # write
         midi_tracks.append(m)
         ch += 1
