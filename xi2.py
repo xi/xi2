@@ -31,6 +31,8 @@ def parse_seq(t):
 
 
 def expand_macros(s):
+    s = re.sub('[ \t]', '', s)
+    s = re.sub('#.*', '', s)
     s = s.replace('\n', r'\n')
     while re.search(r'(\[[^\]]*\]):(.*)', s):
         match = re.search(r'(\[[^\]]*\]):(.*)', s)
@@ -42,16 +44,12 @@ def expand_macros(s):
             val = after.split(r'\n', 1)[0]
             s = s.replace('%s:%s' % (key, val), '')
         s = s.replace(key, val)
-    return s.replace(r'\n', '\n')
+    s = s.replace(r'\n', '\n')
+    s = s.strip('\n')
+    return re.sub('\n\n+', '\n\n', s)
 
 
 def parse(s):
-    s = re.sub('[ \t]', '', s)
-    s = re.sub('#[^\n]*', '', s)
-    s = expand_macros(s)
-    s = s.strip('\n')
-    s = re.sub('\n\n+', '\n\n', s)
-
     tracks = {}
     for section in s.split('\n\n'):
         length = max([len(t) for t in tracks.values()], default=0)
@@ -73,6 +71,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('-t', '--tempo', help='tempo in bpm', default=120, type=int)
     parser.add_argument('-o', '--offset', help='key offset', default=60, type=int)
+    parser.add_argument('-d', '--debug', help='print normalized input and exit', action='store_true')
     parser.add_argument('infile')
     parser.add_argument('outfile')
     return parser.parse_args()
@@ -86,6 +85,12 @@ if __name__ == '__main__':
     else:
         with open(args.infile) as fh:
             s = fh.read()
+
+    s = expand_macros(s)
+    if args.debug:
+        print(s)
+        sys.exit(0)
+
     tracks = parse(s)
 
     # create first track with meta infos
