@@ -56,16 +56,23 @@ class Renderer:
                 self.dt = step
 
 
-def render(seq, midi, ch=0, offset=60):
-    r = Renderer(midi, ch, offset)
+def render(name, seq, ch=0, offset=60):
+    m = midi.Midi()
+    m.meta_event_str(0, 0x04, name)
+    try:
+        prog = int(name)
+    except ValueError:
+        prog = 0
+    m.prog_ch(0, ch, prog)
+    r = Renderer(m, ch, offset)
     r.render_seq(seq)
     r.stop()
+    return m
 
 
 if __name__ == '__main__':
     a = [[['0', '1'], '2'], '4', '5', '-', '', {'0', '4', '7'}, '', '', '0', {'3', '-'}]
-    t = midi.Midi()
-    render(a, t)
+    t = render('name', a)
 
     with open('test.mid', 'wb') as fh:
         midi.write_file(fh, [t])

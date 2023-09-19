@@ -100,15 +100,9 @@ def main():
     midi_tracks.append(t0)
 
     for ch, name in enumerate(tracks):
-        m = midi.Midi()
-        m.meta_event_str(0, 0x04, name)
-        try:
-            prog = int(name)
-        except ValueError:
-            prog = 0
-        m.prog_ch(0, ch, prog)
-        render(tracks[name], m, ch=ch, offset=args.offset)
-        midi_tracks.append(m)
+        midi_tracks.append(
+            render(name, tracks[name], ch=ch, offset=args.offset)
+        )
 
     if args.outfile == '-':
         midi.write_file(sys.stdout.buffer, midi_tracks)
