@@ -51,19 +51,18 @@ if __name__ == '__main__':
     ll = re.sub('#[^\n]*', '', ll)
 
     # expand macros
-    ll = re.sub('\n', '\\\\n', ll)
-    while re.search('(\[[^\]]*\]):(.*)', ll):
-        match = re.search('(\[[^\]]*\]):(.*)', ll)
-        (key, after) = match.groups()
-        if after.startswith('<<'):
-            eol = after.split('\\n',1)[0][2:]
-            val = after.split(eol,2)[1]
-            ll = re.sub(re.escape("%s:<<%s%s%s" % (key, eol, val, eol)), '', ll)
+    ll = ll.replace('\n', r'\n')
+    while re.search(r'(\[[^\]]*\]):(.*)', ll):
+        match = re.search(r'(\[[^\]]*\]):(.*)', ll)
+        key, after = match.groups()
+        if after.startswith(r'\n'):
+            val = after.split('[end]', 1)[0]
+            ll = ll.replace('%s:%s[end]' % (key, val), '')
         else:
-            val = after.split('\\n',1)[0]
-            ll = re.sub(re.escape("%s:%s" % (key, val)), '', ll)
-        ll = re.sub(re.escape(key), val, ll)
-    ll = re.sub('\\\\n', '\n', ll)
+            val = after.split(r'\n', 1)[0]
+            ll = ll.replace('%s:%s' % (key, val), '')
+        ll = ll.replace(key, val)
+    ll = ll.replace(r'\n', '\n')
 
     # trim newlines
     ll = ll.strip('\n')
