@@ -69,29 +69,20 @@ if __name__ == '__main__':
     ll = ll.strip('\n')
     ll = re.sub('\n\n+', '\n\n', ll)
 
-    # join track parts from different sets
+    # join tracks from different sections
     tracks = dict()
-    for s in ll.split('\n\n'):
-        if len(tracks) == 0:
-            l = 0
-        else:
-            l = max([len(t) for t in tracks])
-        for track in s.split('\n'):
+    for section in ll.split('\n\n'):
+        length = max([len(t) for t in tracks.values()], default=0)
+        for track in section.split('\n'):
             try:
-                (name, data) = track.split(':', 1)
+                name, data = track.split(':', 1)
             except Exception:
                 print(track)
                 raise
-            data = parse(data)
             if name not in tracks:
-                tracks[name] = [''] * l
-            tracks[name] += data
-        if len(tracks) == 0:
-            l = 0
-        else:
-            l = max([len(t) for t in tracks])
-        for name, data in tracks.items():
-            data += [''] * (l - len(data))
+                tracks[name] = []
+            tracks[name] += [''] * (length - len(tracks[name]))
+            tracks[name] += parse(data)
 
     # create first track with meta infos
     midi_tracks = []
