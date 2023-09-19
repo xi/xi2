@@ -2,7 +2,7 @@
 
 import io
 
-TIME_DEVISION = 0x00c0 # two bytes
+TIME_DEVISION = 0x00c0  # two bytes
 
 
 class Midi:
