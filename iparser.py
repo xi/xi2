@@ -94,7 +94,7 @@ class IParser:
 if __name__ == '__main__':
     a = [(('0', '1'), '2'), '4', '5', '-', '', ['0', '4', '7'], '', '', '0', ['3', '-']]
     t = midi.Midi()
-    ip = IParser(a, t, 0, 60)
+    ip = IParser(t, a, 0, 60)
 
     with open('test.mid', 'wb') as fh:
         midi.write_file(fh, [t])
